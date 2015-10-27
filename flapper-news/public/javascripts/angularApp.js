@@ -8,8 +8,13 @@ app.config([
         $stateProvider
             .state('home', {
                 url: '/home',
-                template: '/home.html',
-                controller: 'MainCtrl'
+                templateUrl: '/home.html',
+                controller: 'MainCtrl',
+                resolve: {
+                    postPromise: ['posts', function(posts){
+                        return posts.getAll();
+                    }]
+                }
             })
 
             .state('posts', {
@@ -51,9 +56,15 @@ app.controller('MainCtrl', [
     }
 ]);
 
-app.factory('posts', [function(){
+app.factory('posts', ['$http', function(){
     var o = {
         posts: []
+    };
+
+    o.getAll = function() {
+        return $http.get('/posts').success(function(data){
+            angular.copy(data, o.posts);
+        });
     };
 
     return o;
